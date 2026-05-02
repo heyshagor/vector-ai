@@ -629,9 +629,13 @@
     align-items: center;
     justify-content: center;
     gap: 16px;
+    background: var(--bg2);
+    z-index: 10;
   }
 
-  .loading-shimmer.visible { display: flex; }
+  .loading-shimmer.visible {
+    display: flex;
+  }
 
   .shimmer-ring {
     width: 56px;
@@ -879,12 +883,10 @@ function setStatus(state, text) {
 function setLoading(on, label) {
   const btn = document.getElementById('gen-btn');
   const load = document.getElementById('loading');
-  const preview = document.getElementById('view-preview');
 
   btn.disabled = on;
   btn.classList.toggle('loading', on);
   load.classList.toggle('visible', on);
-  preview.style.display = on ? 'none' : 'flex';
 
   if (label) document.getElementById('loading-label').textContent = label;
 }
@@ -895,8 +897,10 @@ async function generate() {
 
   setLoading(true, currentMethod === 'llm' ? 'vector code' : 'image & tracing');
   setStatus('loading', 'Generating...');
+
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('svg-preview').style.display = 'none';
+  document.getElementById('svg-preview').innerHTML = '';
 
   const endpoint = currentMethod === 'llm' ? '/generate-svg' : '/generate-image-svg';
 
@@ -913,7 +917,7 @@ async function generate() {
     }
 
     const data = await res.json();
-    displaySVG(data.svg, prompt);
+    displaySVG(data.svg, prompt, true);
     setStatus('ok', 'Done — ' + data.method);
     showToast('Vector generated successfully!', 'success');
 
@@ -926,19 +930,29 @@ async function generate() {
   }
 }
 
-function displaySVG(svgCode, prompt) {
+function displaySVG(svgCode, prompt, addHistory) {
   currentSVG = svgCode;
 
+  const emptyState = document.getElementById('empty-state');
   const preview = document.getElementById('svg-preview');
+  const viewPreview = document.getElementById('view-preview');
+
+  emptyState.style.display = 'none';
+
   preview.innerHTML = svgCode;
   preview.style.display = 'block';
+  viewPreview.style.display = 'flex';
 
   const svgEl = preview.querySelector('svg');
   if (svgEl) {
+    svgEl.removeAttribute('width');
+    svgEl.removeAttribute('height');
     svgEl.style.maxWidth = '100%';
     svgEl.style.maxHeight = '300px';
     svgEl.style.width = 'auto';
     svgEl.style.height = 'auto';
+    svgEl.style.display = 'block';
+    svgEl.style.margin = '0 auto';
   }
 
   document.getElementById('svg-code').value = svgCode;
@@ -947,7 +961,7 @@ function displaySVG(svgCode, prompt) {
     document.getElementById(id).disabled = false;
   });
 
-  addToHistory(svgCode, prompt);
+  if (addHistory) addToHistory(svgCode, prompt);
 }
 
 function downloadSVG() {
@@ -1003,7 +1017,7 @@ function addToHistory(svgCode, prompt) {
       svgEl.style.height = 'auto';
     }
     card.onclick = () => {
-      displaySVG(item.svg, item.prompt);
+      displaySVG(item.svg, item.prompt, false);
       showToast('Loaded from history', 'success');
     };
     grid.appendChild(card);
