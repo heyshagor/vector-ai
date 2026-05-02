@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VectorAI — SVG Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0a0a0b;
+    --bg2:      #111114;
+    --bg3:      #18181d;
+    --bg4:      #1f1f26;
+    --border:   #2a2a35;
+    --border2:  #3a3a48;
+    --text:     #e8e8f0;
+    --muted:    #6b6b80;
+    --accent:   #7fffb2;
+    --accent2:  #4de8ff;
+    --accent3:  #ff6b9d;
+    --warn:     #ffb84d;
+    --font-display: 'Syne', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(127,255,178,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(127,255,178,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 28px 0 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    animation: fadeDown 0.5s ease both;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    border: 1.5px solid var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-mark svg { width: 20px; height: 20px; }
+
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-text span { color: var(--accent); }
+
+  .header-badge {
+    font-size: 11px;
+    color: var(--muted);
+    border: 1px solid var(--border2);
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 56px 0 40px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero-tag {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero-tag::before {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 480px;
+  }
+
+  /* MAIN LAYOUT */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 20px;
+    padding-bottom: 60px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  @media (max-width: 800px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  /* PANEL */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .panel-header .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* CONTROLS */
+  .controls { padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 12px 14px;
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); }
+
+  /* STYLE SELECTOR */
+  .style-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .style-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .style-btn svg { width: 18px; height: 18px; opacity: 0.5; transition: opacity 0.15s; }
+  .style-btn:hover { border-color: var(--border2); color: var(--text); }
+  .style-btn:hover svg { opacity: 0.8; }
+
+  .style-btn.active {
+    background: rgba(127,255,178,0.06);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .style-btn.active svg { opacity: 1; stroke: var(--accent); }
+
+  /* METHOD TOGGLE */
+  .method-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    background: var(--bg3);
+    padding: 4px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .method-btn {
+    padding: 8px 12px;
+    border-radius: 7px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .method-btn.active {
+    background: var(--bg4);
+    color: var(--text);
+    border: 1px solid var(--border2);
+  }
+
+  /* GENERATE BTN */
+  .gen-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #0a0a0b;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .gen-btn:hover { background: #a0ffc8; transform: translateY(-1px); }
+  .gen-btn:active { transform: translateY(0); }
+  .gen-btn:disabled {
+    background: var(--bg4);
+    color: var(--muted);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .gen-btn .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(0,0,0,0.2);
+    border-top-color: #0a0a0b;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .gen-btn.loading .spinner { display: block; }
+  .gen-btn.loading .btn-label { opacity: 0.7; }
+
+  /* EXAMPLE PROMPTS */
+  .examples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .example-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    background: var(--bg3);
+    transition: all 0.15s;
+    font-family: var(--font-mono);
+  }
+
+  .example-chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* OUTPUT PANEL */
+  .output-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .output-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+
+  .out-tab {
+    padding: 14px 16px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: var(--font-mono);
+  }
+
+  .out-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .output-body { flex: 1; position: relative; min-height: 400px; }
+
+  /* PREVIEW */
+  .preview-area {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+  }
+
+  .preview-empty {
+    text-align: center;
+  }
+
+  .preview-empty .big-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    opacity: 0.15;
+  }
+
+  .preview-empty p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  #svg-preview {
+    max-width: 100%;
+    max-height: 320px;
+    display: none;
+    animation: popIn 0.3s ease both;
+  }
+
+  #svg-preview svg,
+  #svg-preview img {
+    max-width: 100%;
+    max-height: 320px;
+    width: auto;
+    height: auto;
+  }
+
+  /* CODE VIEW */
+  .code-area {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+  }
+
+  .code-area.visible { display: flex; }
+
+  #svg-code {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--accent2);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.7;
+    padding: 20px;
+    resize: none;
+    outline: none;
+    overflow: auto;
+  }
+
+  /* ACTION BUTTONS */
+  .action-bar {
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    background: var(--bg3);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .action-btn.primary {
+    background: rgba(127,255,178,0.08);
+    border-color: rgba(127,255,178,0.3);
+    color: var(--accent);
+  }
+
+  .action-btn.primary:hover {
+    background: rgba(127,255,178,0.15);
+    border-color: var(--accent);
+  }
+
+  .action-btn svg { width: 14px; height: 14px; }
+
+  /* STATUS BAR */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+
+  .status-dot.ok { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+  .status-dot.err { background: var(--accent3); }
+  .status-dot.loading { background: var(--warn); animation: pulse 1s infinite; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--bg4);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+  }
+
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .toast.success { border-color: rgba(127,255,178,0.4); }
+  .toast.error { border-color: rgba(255,107,157,0.4); color: var(--accent3); }
+
+  /* HISTORY STRIP */
+  .history-section {
+    padding: 0 0 40px;
+    animation: fadeUp 0.6s 0.35s ease both;
+  }
+
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .history-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .history-grid::-webkit-scrollbar { height: 3px; }
+  .history-grid::-webkit-scrollbar-track { background: var(--bg2); }
+  .history-grid::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .history-card {
+    flex-shrink: 0;
+    width: 110px;
+    height: 110px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .history-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .history-card svg { max-width: 100%; max-height: 100%; }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* LOADING SHIMMER */
+  .loading-shimmer {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .loading-shimmer.visible { display: flex; }
+
+  .shimmer-ring {
+    width: 56px;
+    height: 56px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+  }
+
+  .shimmer-text {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  .shimmer-text span {
+    color: var(--accent);
+    animation: pulse 1.5s infinite;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20" fill="none" stroke="#7fffb2" stroke-width="1.5">
+          <polygon points="10,2 18,7 18,13 10,18 2,13 2,7"/>
+          <circle cx="10" cy="10" r="2.5" fill="#7fffb2" stroke="none"/>
+        </svg>
+      </div>
+      <span class="logo-text">Vector<span>AI</span></span>
+    </div>
+    <span class="header-badge">Free &amp; Open</span>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag">AI-Powered SVG Generator</div>
+    <h1>Turn words into<br><em>clean vectors</em></h1>
+    <p>Type a prompt, pick a style, get production-ready SVG code instantly. Powered by Groq LLM and Pollinations.ai — completely free.</p>
+  </section>
+
+  <!-- MAIN GRID -->
+  <div class="main-grid">
+
+    <!-- LEFT: CONTROLS -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="dot"></span>
+        Input
+      </div>
+      <div class="controls">
+
+        <!-- PROMPT -->
+        <div>
+          <label>Prompt</label>
+          <textarea id="prompt" placeholder="e.g. minimalist wifi icon, solar panel logo, geometric mountain..." rows="3"></textarea>
+          <div class="examples" style="margin-top:8px;">
+            <span class="example-chip" onclick="setPrompt('wifi signal icon')">wifi icon</span>
+            <span class="example-chip" onclick="setPrompt('solar panel logo minimal')">solar logo</span>
+            <span class="example-chip" onclick="setPrompt('abstract mountain geometric')">mountain</span>
+            <span class="example-chip" onclick="setPrompt('settings gear icon outline')">settings gear</span>
+            <span class="example-chip" onclick="setPrompt('lightning bolt icon')">lightning</span>
+            <span class="example-chip" onclick="setPrompt('leaf nature icon minimal')">leaf</span>
+          </div>
+        </div>
+
+        <!-- STYLE -->
+        <div>
+          <label>Style</label>
+          <div class="style-grid">
+            <button class="style-btn active" data-style="icon" onclick="setStyle(this)">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="4" y="4" width="5" height="5" rx="1"/>
+                <rect x="11" y="4" width="5" height="5" rx="1"/>
+                <rect x="4" y="11" width="5" height="5" rx="1"/>
+                <rect x="11" y="11" width="5" height="5" rx="1"/>
+              </svg>
+              Icon
+            </button>
+            <button class="style-btn" data-style="logo" onclick="setStyle(this)">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polygon points="10,3 17,7.5 17,12.5 10,17 3,12.5 3,7.5"/>
+              </svg>
+              Logo
+            </button>
+            <button class="style-btn" data-style="illustration" onclick="setStyle(this)">
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="10" cy="10" r="7"/>
+                <path d="M10 3 Q14 7 10 10 Q6 13 10 17"/>
+              </svg>
+              Illus.
+            </button>
+          </div>
+        </div>
+
+        <!-- METHOD -->
+        <div>
+          <label>Method</label>
+          <div class="method-toggle">
+            <button class="method-btn active" id="method-llm" onclick="setMethod('llm')">
+              LLM Code
+            </button>
+            <button class="method-btn" id="method-img" onclick="setMethod('img')">
+              Image &rarr; SVG
+            </button>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;" id="method-desc">
+            Groq AI writes SVG code directly. Best for icons and logos.
+          </p>
+        </div>
+
+        <!-- GENERATE -->
+        <button class="gen-btn" id="gen-btn" onclick="generate()">
+          <div class="spinner"></div>
+          <span class="btn-label">Generate Vector</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: OUTPUT -->
+    <div class="panel output-panel">
+      <div class="output-tabs">
+        <button class="out-tab active" id="tab-preview" onclick="switchTab('preview')">Preview</button>
+        <button class="out-tab" id="tab-code" onclick="switchTab('code')">SVG Code</button>
+        <div class="status-bar">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-text">Ready</span>
+        </div>
+      </div>
+
+      <div class="output-body">
+
+        <!-- LOADING -->
+        <div class="loading-shimmer" id="loading">
+          <div class="shimmer-ring"></div>
+          <div class="shimmer-text">Generating <span id="loading-label">vector</span>...</div>
+        </div>
+
+        <!-- PREVIEW TAB -->
+        <div class="preview-area" id="view-preview">
+          <div class="preview-empty" id="empty-state">
+            <svg class="big-icon" viewBox="0 0 64 64" fill="none" stroke="#7fffb2" stroke-width="1.2">
+              <rect x="8" y="8" width="48" height="48" rx="6"/>
+              <path d="M8 40 L20 28 L30 36 L42 22 L56 40"/>
+              <circle cx="44" cy="20" r="5"/>
+            </svg>
+            <p>Your SVG will appear here.<br>Enter a prompt and click generate.</p>
+          </div>
+          <div id="svg-preview"></div>
+        </div>
+
+        <!-- CODE TAB -->
+        <div class="code-area" id="view-code">
+          <textarea id="svg-code" readonly placeholder="// SVG code will appear here after generation..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="action-bar">
+        <button class="action-btn primary" id="btn-download" onclick="downloadSVG()" disabled>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M8 2v8M5 7l3 3 3-3"/>
+            <path d="M2 12h12"/>
+          </svg>
+          Download .svg
+        </button>
+        <button class="action-btn" id="btn-copy" onclick="copyCode()" disabled>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="5" y="5" width="9" height="9" rx="1.5"/>
+            <path d="M11 5V3a1 1 0 00-1-1H3a1 1 0 00-1 1v7a1 1 0 001 1h2"/>
+          </svg>
+          Copy Code
+        </button>
+        <button class="action-btn" id="btn-clear" onclick="clearOutput()" disabled>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 3l10 10M13 3L3 13"/>
+          </svg>
+          Clear
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section" id="history-section" style="display:none;">
+    <div class="section-label">
+      Recent generations
+    </div>
+    <div class="history-grid" id="history-grid"></div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = 'https://vector-ai-backend.onrender.com';
+
+let currentSVG = '';
+let currentMethod = 'llm';
+let currentStyle = 'icon';
+let history = [];
+
+function setPrompt(text) {
+  document.getElementById('prompt').value = text;
+}
+
+function setStyle(btn) {
+  document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentStyle = btn.dataset.style;
+}
+
+function setMethod(m) {
+  currentMethod = m;
+  document.getElementById('method-llm').classList.toggle('active', m === 'llm');
+  document.getElementById('method-img').classList.toggle('active', m === 'img');
+  document.getElementById('method-desc').textContent = m === 'llm'
+    ? 'Groq AI writes SVG code directly. Best for icons and logos.'
+    : 'Pollinations generates an image, then converts it to vector. Best for illustrations.';
+}
+
+function switchTab(tab) {
+  document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
+  document.getElementById('tab-code').classList.toggle('active', tab === 'code');
+  document.getElementById('view-preview').style.display = tab === 'preview' ? 'flex' : 'none';
+  document.getElementById('view-code').classList.toggle('visible', tab === 'code');
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot ' + (state || '');
+  document.getElementById('status-text').textContent = text;
+}
+
+function setLoading(on, label) {
+  const btn = document.getElementById('gen-btn');
+  const load = document.getElementById('loading');
+  const preview = document.getElementById('view-preview');
+
+  btn.disabled = on;
+  btn.classList.toggle('loading', on);
+  load.classList.toggle('visible', on);
+  preview.style.display = on ? 'none' : 'flex';
+
+  if (label) document.getElementById('loading-label').textContent = label;
+}
+
+async function generate() {
+  const prompt = document.getElementById('prompt').value.trim();
+  if (!prompt) { showToast('Please enter a prompt first.', 'error'); return; }
+
+  setLoading(true, currentMethod === 'llm' ? 'vector code' : 'image & tracing');
+  setStatus('loading', 'Generating...');
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('svg-preview').style.display = 'none';
+
+  const endpoint = currentMethod === 'llm' ? '/generate-svg' : '/generate-image-svg';
+
+  try {
+    const res = await fetch(API + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, style: currentStyle })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || 'Server error ' + res.status);
+    }
+
+    const data = await res.json();
+    displaySVG(data.svg, prompt);
+    setStatus('ok', 'Done — ' + data.method);
+    showToast('Vector generated successfully!', 'success');
+
+  } catch (e) {
+    setStatus('err', 'Error');
+    document.getElementById('empty-state').style.display = 'block';
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function displaySVG(svgCode, prompt) {
+  currentSVG = svgCode;
+
+  const preview = document.getElementById('svg-preview');
+  preview.innerHTML = svgCode;
+  preview.style.display = 'block';
+
+  const svgEl = preview.querySelector('svg');
+  if (svgEl) {
+    svgEl.style.maxWidth = '100%';
+    svgEl.style.maxHeight = '300px';
+    svgEl.style.width = 'auto';
+    svgEl.style.height = 'auto';
+  }
+
+  document.getElementById('svg-code').value = svgCode;
+
+  ['btn-download','btn-copy','btn-clear'].forEach(id => {
+    document.getElementById(id).disabled = false;
+  });
+
+  addToHistory(svgCode, prompt);
+}
+
+function downloadSVG() {
+  if (!currentSVG) return;
+  const blob = new Blob([currentSVG], { type: 'image/svg+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'vector-ai-' + Date.now() + '.svg';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('SVG downloaded!', 'success');
+}
+
+function copyCode() {
+  if (!currentSVG) return;
+  navigator.clipboard.writeText(currentSVG).then(() => {
+    showToast('SVG code copied to clipboard!', 'success');
+  });
+}
+
+function clearOutput() {
+  currentSVG = '';
+  document.getElementById('svg-preview').innerHTML = '';
+  document.getElementById('svg-preview').style.display = 'none';
+  document.getElementById('svg-code').value = '';
+  document.getElementById('empty-state').style.display = 'block';
+  ['btn-download','btn-copy','btn-clear'].forEach(id => {
+    document.getElementById(id).disabled = true;
+  });
+  setStatus('', 'Ready');
+}
+
+function addToHistory(svgCode, prompt) {
+  history.unshift({ svg: svgCode, prompt });
+  if (history.length > 12) history.pop();
+
+  const section = document.getElementById('history-section');
+  const grid = document.getElementById('history-grid');
+  section.style.display = 'block';
+  grid.innerHTML = '';
+
+  history.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'history-card';
+    card.title = item.prompt;
+    card.innerHTML = item.svg;
+    const svgEl = card.querySelector('svg');
+    if (svgEl) {
+      svgEl.style.maxWidth = '80px';
+      svgEl.style.maxHeight = '80px';
+      svgEl.style.width = 'auto';
+      svgEl.style.height = 'auto';
+    }
+    card.onclick = () => {
+      displaySVG(item.svg, item.prompt);
+      showToast('Loaded from history', 'success');
+    };
+    grid.appendChild(card);
+  });
+}
+
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (type || '');
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.getElementById('prompt').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) generate();
+});
+</script>
+</body>
+</html>
